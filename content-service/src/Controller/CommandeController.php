@@ -39,7 +39,7 @@ class CommandeController extends AbstractController
 
         // Send request to Billing Service to create an invoice
         try {
-            $response = $this->httpClient->request('POST', 'http://127.0.0.1/facture/create', [
+            $response = $this->httpClient->request('POST', 'http://127.0.0.1:8000/facture/create', [
                 'json' => [
                     'amount' => $data['total_price'],
                     'due_date' => (new \DateTime('+30 days'))->format('Y-m-d'),

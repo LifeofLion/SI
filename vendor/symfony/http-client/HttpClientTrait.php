@@ -100,7 +100,8 @@ trait HttpClientTrait
         if (isset($options['body'])) {
             $options['body'] = self::normalizeBody($options['body'], $options['normalized_headers']);
 
-            if (\is_string($options['body'])
+            if (
+                \is_string($options['body'])
                 && (string) \strlen($options['body']) !== substr($h = $options['normalized_headers']['content-length'][0] ?? '', 16)
                 && ('' !== $h || '' !== $options['body'])
             ) {
@@ -149,7 +150,7 @@ trait HttpClientTrait
                 throw new InvalidArgumentException(sprintf('Option "auth_bearer" must be a string, "%s" given.', get_debug_type($options['auth_bearer'])));
             }
             if (preg_match('{[^\x21-\x7E]}', $options['auth_bearer'])) {
-                throw new InvalidArgumentException('Invalid character found in option "auth_bearer": '.json_encode($options['auth_bearer']).'.');
+                throw new InvalidArgumentException('Invalid character found in option "auth_bearer": ' . json_encode($options['auth_bearer']) . '.');
             }
         }
 
@@ -160,11 +161,11 @@ trait HttpClientTrait
         if (null !== $url) {
             // Merge auth with headers
             if (($options['auth_basic'] ?? false) && !($options['normalized_headers']['authorization'] ?? false)) {
-                $options['normalized_headers']['authorization'] = ['Authorization: Basic '.base64_encode($options['auth_basic'])];
+                $options['normalized_headers']['authorization'] = ['Authorization: Basic ' . base64_encode($options['auth_basic'])];
             }
             // Merge bearer with headers
             if (($options['auth_bearer'] ?? false) && !($options['normalized_headers']['authorization'] ?? false)) {
-                $options['normalized_headers']['authorization'] = ['Authorization: Bearer '.$options['auth_bearer']];
+                $options['normalized_headers']['authorization'] = ['Authorization: Bearer ' . $options['auth_bearer']];
             }
 
             unset($options['auth_basic'], $options['auth_bearer']);
@@ -207,7 +208,7 @@ trait HttpClientTrait
         if ($resolve = $options['resolve'] ?? false) {
             $options['resolve'] = [];
             foreach ($resolve as $k => $v) {
-                $options['resolve'][substr(self::parseUrl('http://'.$k)['authority'], 2)] = (string) $v;
+                $options['resolve'][substr(self::parseUrl('http://' . $k)['authority'], 2)] = (string) $v;
             }
         }
 
@@ -230,7 +231,7 @@ trait HttpClientTrait
 
         if ($resolve = $defaultOptions['resolve'] ?? false) {
             foreach ($resolve as $k => $v) {
-                $options['resolve'] += [substr(self::parseUrl('http://'.$k)['authority'], 2) => (string) $v];
+                $options['resolve'] += [substr(self::parseUrl('http://' . $k)['authority'], 2) => (string) $v];
             }
         }
 
@@ -251,7 +252,7 @@ trait HttpClientTrait
                     $msg = 'try using "%s" instead.';
                 }
 
-                throw new InvalidArgumentException(sprintf('Option "auth_ntlm" is not supported by "%s", '.$msg, __CLASS__, CurlHttpClient::class));
+                throw new InvalidArgumentException(sprintf('Option "auth_ntlm" is not supported by "%s", ' . $msg, __CLASS__, CurlHttpClient::class));
             }
 
             if ('vars' === $name) {
@@ -304,7 +305,7 @@ trait HttpClientTrait
             $normalizedHeaders[$lcName] = [];
 
             foreach ($values as $value) {
-                $normalizedHeaders[$lcName][] = $value = $name.': '.$value;
+                $normalizedHeaders[$lcName][] = $value = $name . ': ' . $value;
 
                 if (\strlen($value) !== strcspn($value, "\r\n\0")) {
                     throw new InvalidArgumentException(sprintf('Invalid header: CR/LF/NUL found in "%s".', $value));
@@ -358,7 +359,7 @@ trait HttpClientTrait
                 $boundary = $boundary[1];
             } else {
                 $boundary = substr(strtr(base64_encode($cookie ??= random_bytes(8)), '+/', '-_'), 0, -2);
-                $normalizedHeaders['content-type'] = ['Content-Type: multipart/form-data; boundary='.$boundary];
+                $normalizedHeaders['content-type'] = ['Content-Type: multipart/form-data; boundary=' . $boundary];
             }
 
             $body = explode('&', $body);
@@ -366,11 +367,11 @@ trait HttpClientTrait
 
             foreach ($body as $i => $part) {
                 [$k, $v] = explode('=', $part, 2);
-                $part = ($i ? "\r\n" : '')."--{$boundary}\r\n";
+                $part = ($i ? "\r\n" : '') . "--{$boundary}\r\n";
                 $k = str_replace(['"', "\r", "\n"], ['%22', '%0D', '%0A'], urldecode($k)); // see WHATWG HTML living standard
 
                 if (!isset($streams[$v])) {
-                    $part .= "Content-Disposition: form-data; name=\"{$k}\"\r\n\r\n".urldecode($v);
+                    $part .= "Content-Disposition: form-data; name=\"{$k}\"\r\n\r\n" . urldecode($v);
                     $contentLength += 0 <= $contentLength ? \strlen($part) : 0;
                     $body[$i] = [$k, $part, null];
                     continue;
@@ -426,7 +427,7 @@ trait HttpClientTrait
             $body[++$i] = ['', "\r\n--{$boundary}--\r\n", null];
 
             if (0 < $contentLength) {
-                $normalizedHeaders['content-length'] = ['Content-Length: '.($contentLength += \strlen($body[$i][1]))];
+                $normalizedHeaders['content-length'] = ['Content-Length: ' . ($contentLength += \strlen($body[$i][1]))];
             }
 
             $body = static function ($size) use ($body) {
@@ -469,7 +470,9 @@ trait HttpClientTrait
         }
 
         if ($body instanceof \Traversable) {
-            return $generatorToCallable((static function ($body) { yield from $body; })($body));
+            return $generatorToCallable((static function ($body) {
+                yield from $body;
+            })($body));
         }
 
         if ($body instanceof \Closure) {
@@ -542,7 +545,7 @@ trait HttpClientTrait
         try {
             $value = json_encode($value, $flags | \JSON_THROW_ON_ERROR, $maxDepth);
         } catch (\JsonException $e) {
-            throw new InvalidArgumentException('Invalid value for "json" option: '.$e->getMessage());
+            throw new InvalidArgumentException('Invalid value for "json" option: ' . $e->getMessage());
         }
 
         return $value;
@@ -557,7 +560,7 @@ trait HttpClientTrait
      */
     private static function resolveUrl(array $url, ?array $base, array $queryDefaults = []): array
     {
-        if (null !== $base && '' === ($base['scheme'] ?? '').($base['authority'] ?? '')) {
+        if (null !== $base && '' === ($base['scheme'] ?? '') . ($base['authority'] ?? '')) {
             throw new InvalidArgumentException(sprintf('Invalid "base_uri" option: host or scheme is missing in "%s".', implode('', $base)));
         }
 
@@ -565,7 +568,7 @@ trait HttpClientTrait
             throw new InvalidArgumentException(sprintf('Invalid URL: scheme is missing in "%s". Did you forget to add "http(s)://"?', implode('', $base ?? $url)));
         }
 
-        if (null === $base && '' === $url['scheme'].$url['authority']) {
+        if (null === $base && '' === $url['scheme'] . $url['authority']) {
             throw new InvalidArgumentException(sprintf('Invalid URL: no "base_uri" option was provided and host or scheme is missing in "%s".', implode('', $url)));
         }
 
@@ -581,7 +584,7 @@ trait HttpClientTrait
                 } else {
                     if ('/' !== $url['path'][0]) {
                         if (null === $base['path']) {
-                            $url['path'] = '/'.$url['path'];
+                            $url['path'] = '/' . $url['path'];
                         } else {
                             $segments = explode('/', $base['path']);
                             array_splice($segments, -1, 1, [$url['path']]);
@@ -595,7 +598,7 @@ trait HttpClientTrait
                 $url['authority'] = $base['authority'];
 
                 if ($queryDefaults) {
-                    $url['query'] = '?'.self::mergeQueryString(substr($url['query'] ?? '', 1), $queryDefaults, false);
+                    $url['query'] = '?' . self::mergeQueryString(substr($url['query'] ?? '', 1), $queryDefaults, false);
                 }
             }
 
@@ -645,7 +648,7 @@ trait HttpClientTrait
             }
 
             $host = \defined('INTL_IDNA_VARIANT_UTS46') ? idn_to_ascii($host, \IDNA_DEFAULT | \IDNA_USE_STD3_RULES | \IDNA_CHECK_BIDI | \IDNA_CHECK_CONTEXTJ | \IDNA_NONTRANSITIONAL_TO_ASCII, \INTL_IDNA_VARIANT_UTS46) ?: strtolower($host) : strtolower($host);
-            $host .= $port ? ':'.$port : '';
+            $host .= $port ? ':' . $port : '';
         }
 
         foreach (['user', 'pass', 'path', 'query', 'fragment'] as $part) {
@@ -664,10 +667,10 @@ trait HttpClientTrait
 
         return [
             'scheme' => $scheme,
-            'authority' => null !== $host ? '//'.(isset($parts['user']) ? $parts['user'].(isset($parts['pass']) ? ':'.$parts['pass'] : '').'@' : '').$host : null,
+            'authority' => null !== $host ? '//' . (isset($parts['user']) ? $parts['user'] . (isset($parts['pass']) ? ':' . $parts['pass'] : '') . '@' : '') . $host : null,
             'path' => isset($parts['path'][0]) ? $parts['path'] : null,
-            'query' => isset($parts['query']) ? '?'.$parts['query'] : null,
-            'fragment' => isset($parts['fragment']) ? '#'.$parts['fragment'] : null,
+            'query' => isset($parts['query']) ? '?' . $parts['query'] : null,
+            'fragment' => isset($parts['fragment']) ? '#' . $parts['fragment'] : null,
         ];
     }
 
@@ -716,7 +719,7 @@ trait HttpClientTrait
             foreach (explode('&', $queryString) as $v) {
                 if ('' !== $v) {
                     $k = urldecode(explode('=', $v, 2)[0]);
-                    $query[$k] = (isset($query[$k]) ? $query[$k].'&' : '').$v;
+                    $query[$k] = (isset($query[$k]) ? $query[$k] . '&' : '') . $v;
                 }
             }
         }
@@ -774,9 +777,9 @@ trait HttpClientTrait
         }
 
         if ('http' === $proxy['scheme']) {
-            $proxyUrl = 'tcp://'.$proxy['host'].':'.($proxy['port'] ?? '80');
+            $proxyUrl = 'tcp://' . $proxy['host'] . ':' . ($proxy['port'] ?? '80');
         } elseif ('https' === $proxy['scheme']) {
-            $proxyUrl = 'ssl://'.$proxy['host'].':'.($proxy['port'] ?? '443');
+            $proxyUrl = 'ssl://' . $proxy['host'] . ':' . ($proxy['port'] ?? '443');
         } else {
             throw new TransportException(sprintf('Unsupported proxy scheme "%s": "http" or "https" expected.', $proxy['scheme']));
         }
@@ -786,7 +789,7 @@ trait HttpClientTrait
 
         return [
             'url' => $proxyUrl,
-            'auth' => isset($proxy['user']) ? 'Basic '.base64_encode(rawurldecode($proxy['user']).':'.rawurldecode($proxy['pass'] ?? '')) : null,
+            'auth' => isset($proxy['user']) ? 'Basic ' . base64_encode(rawurldecode($proxy['user']) . ':' . rawurldecode($proxy['pass'] ?? '')) : null,
             'no_proxy' => $noProxy,
         ];
     }

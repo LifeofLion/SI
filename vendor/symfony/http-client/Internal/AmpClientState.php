@@ -71,7 +71,7 @@ final class AmpClientState extends ClientState
             // Matching "no_proxy" should follow the behavior of curl
             $host = $request->getUri()->getHost();
             foreach ($options['proxy']['no_proxy'] as $rule) {
-                $dotRule = '.'.ltrim($rule, '.');
+                $dotRule = '.' . ltrim($rule, '.');
 
                 if ('*' === $rule || $host === $rule || str_ends_with($host, $dotRule)) {
                     $options['proxy'] = null;
@@ -141,7 +141,8 @@ final class AmpClientState extends ClientState
         $options['capture_peer_cert_chain'] && $context = $context->withPeerCapturing();
         $options['crypto_method'] && $context = $context->withMinimumVersion($options['crypto_method']);
 
-        $connector = $handleConnector = new class() implements Connector {
+        $connector = $handleConnector = new class() implements Connector
+        {
             public DnsConnector $connector;
             public string $uri;
             /** @var resource|null */
@@ -165,7 +166,7 @@ final class AmpClientState extends ClientState
 
         if ($options['bindto']) {
             if (file_exists($options['bindto'])) {
-                $connector->uri = 'unix://'.$options['bindto'];
+                $connector->uri = 'unix://' . $options['bindto'];
             } else {
                 $context = $context->withBindTo($options['bindto']);
             }

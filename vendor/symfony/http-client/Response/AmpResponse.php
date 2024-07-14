@@ -90,7 +90,8 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
         $info['max_duration'] = $options['max_duration'];
         $info['debug'] = '';
 
-        $onProgress = $options['on_progress'] ?? static function () {};
+        $onProgress = $options['on_progress'] ?? static function () {
+        };
         $onProgress = $this->onProgress = static function () use (&$info, $onProgress) {
             $info['total_time'] = microtime(true) - $info['start_time'];
             $onProgress((int) $info['size_download'], ((int) (1 + $info['download_content_length']) ?: 1) - 1, (array) $info);
@@ -143,12 +144,12 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
 
     public function __sleep(): array
     {
-        throw new \BadMethodCallException('Cannot serialize '.__CLASS__);
+        throw new \BadMethodCallException('Cannot serialize ' . __CLASS__);
     }
 
     public function __wakeup(): void
     {
-        throw new \BadMethodCallException('Cannot unserialize '.__CLASS__);
+        throw new \BadMethodCallException('Cannot unserialize ' . __CLASS__);
     }
 
     public function __destruct()
@@ -292,7 +293,8 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
                 return $response;
             }
 
-            $urlResolver = new class() {
+            $urlResolver = new class()
+            {
                 use HttpClientTrait {
                     parseUrl as public;
                     resolveUrl as public;
@@ -318,7 +320,7 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
                 // Discard body of redirects
                 while (null !== yield $response->getBody()->read()) {
                 }
-            } catch (HttpException|StreamException) {
+            } catch (HttpException | StreamException) {
                 // Ignore streaming errors on previous responses
             }
 
@@ -379,7 +381,7 @@ final class AmpResponse implements ResponseInterface, StreamableInterface
 
         foreach ($response->getRawHeaders() as [$name, $value]) {
             $headers[strtolower($name)][] = $value;
-            $h = $name.': '.$value;
+            $h = $name . ': ' . $value;
             $info['debug'] .= "< {$h}\r\n";
             $info['response_headers'][] = $h;
         }

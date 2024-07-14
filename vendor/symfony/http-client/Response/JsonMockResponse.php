@@ -23,7 +23,7 @@ class JsonMockResponse extends MockResponse
         try {
             $json = json_encode($body, \JSON_THROW_ON_ERROR | \JSON_PRESERVE_ZERO_FRACTION);
         } catch (\JsonException $e) {
-            throw new InvalidArgumentException('JSON encoding failed: '.$e->getMessage(), $e->getCode(), $e);
+            throw new InvalidArgumentException('JSON encoding failed: ' . $e->getMessage(), $e->getCode(), $e);
         }
 
         $info['response_headers']['content-type'] ??= 'application/json';

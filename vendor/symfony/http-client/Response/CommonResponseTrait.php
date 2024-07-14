@@ -87,7 +87,7 @@ trait CommonResponseTrait
         try {
             $content = json_decode($content, true, 512, \JSON_BIGINT_AS_STRING | \JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            throw new JsonException($e->getMessage().sprintf(' for "%s".', $this->getInfo('url')), $e->getCode());
+            throw new JsonException($e->getMessage() . sprintf(' for "%s".', $this->getInfo('url')), $e->getCode());
         }
 
         if (!\is_array($content)) {
@@ -121,12 +121,12 @@ trait CommonResponseTrait
 
     public function __sleep(): array
     {
-        throw new \BadMethodCallException('Cannot serialize '.__CLASS__);
+        throw new \BadMethodCallException('Cannot serialize ' . __CLASS__);
     }
 
     public function __wakeup(): void
     {
-        throw new \BadMethodCallException('Cannot unserialize '.__CLASS__);
+        throw new \BadMethodCallException('Cannot unserialize ' . __CLASS__);
     }
 
     /**

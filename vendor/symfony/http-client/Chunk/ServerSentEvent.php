@@ -52,7 +52,7 @@ final class ServerSentEvent extends DataChunk implements ChunkInterface
                     $this->type = substr($line, $i);
                     break;
                 case 'data':
-                    $this->data .= ('' === $this->data ? '' : "\n").substr($line, $i);
+                    $this->data .= ('' === $this->data ? '' : "\n") . substr($line, $i);
                     break;
                 case 'retry':
                     $retry = substr($line, $i);
@@ -102,7 +102,7 @@ final class ServerSentEvent extends DataChunk implements ChunkInterface
         try {
             $jsonData = json_decode($this->data, true, 512, \JSON_BIGINT_AS_STRING | \JSON_THROW_ON_ERROR);
         } catch (\JsonException $e) {
-            throw new JsonException(sprintf('Decoding Server-Sent Event%s failed: ', '' !== $this->id ? sprintf(' "%s"', $this->id) : '').$e->getMessage(), $e->getCode());
+            throw new JsonException(sprintf('Decoding Server-Sent Event%s failed: ', '' !== $this->id ? sprintf(' "%s"', $this->id) : '') . $e->getMessage(), $e->getCode());
         }
 
         if (!\is_array($jsonData)) {
